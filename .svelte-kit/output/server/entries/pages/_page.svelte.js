@@ -1,15 +1,72 @@
 import "clsx";
-import { d as ensure_array_like, f as attr, h as attr_style, e as escape_html, i as stringify } from "../../chunks/index.js";
-function Chatbot($$payload) {
+import { G as store_get, I as store_mutate, J as unsubscribe_stores, C as pop, z as push, K as ensure_array_like, M as attr, N as attr_style, F as escape_html, O as stringify } from "../../chunks/index.js";
+import { w as writable } from "../../chunks/index2.js";
+const newLoading = () => {
+  const { subscribe, update, set } = writable({
+    status: "IDLE",
+    // IDLE, LOADING, NAVIGATING
+    message: ""
+  });
+  function setNavigate(isNavigating) {
+    update(() => {
+      return {
+        status: isNavigating ? "NAVIGATING" : "IDLE",
+        message: ""
+      };
+    });
+  }
+  function setLoading(isLoading, message = "") {
+    update(() => {
+      return {
+        status: isLoading ? "LOADING" : "IDLE",
+        message: isLoading ? message : ""
+      };
+    });
+  }
+  return { subscribe, update, set, setNavigate, setLoading };
+};
+const loading = newLoading();
+function Loading($$payload, $$props) {
+  push();
+  var $$store_subs;
+  if (store_get($$store_subs ??= {}, "$loading", loading).status === "NAVIGATING") {
+    setTimeout(
+      () => {
+        if (store_get($$store_subs ??= {}, "$loading", loading).status === "NAVIGATING") {
+          store_mutate($$store_subs ??= {}, "$loading", loading, store_get($$store_subs ??= {}, "$loading", loading).status = "LOADING");
+        }
+      },
+      400
+    );
+  }
+  if (store_get($$store_subs ??= {}, "$loading", loading).status === "LOADING") {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<div class="svelte-1kxkma5"></div>`;
+  } else {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]-->`;
+  if ($$store_subs) unsubscribe_stores($$store_subs);
+  pop();
+}
+function Chatbot($$payload, $$props) {
+  push();
   let messages = [];
   let input = "";
   const each_array = ensure_array_like(messages);
-  $$payload.out += `<div class="chat-container svelte-v6mqcw"><div class="TopicList svelte-v6mqcw"><button class="svelte-v6mqcw">Internet effect on jobs</button> <button class="svelte-v6mqcw">To do...</button> <button class="svelte-v6mqcw">To do...</button> <button class="svelte-v6mqcw">To do...</button> <input${attr("value", input)} placeholder="Custom Topic..." class="svelte-v6mqcw"> <div class="marginLeft svelte-v6mqcw"><button class="svelte-v6mqcw">Start New Topic</button></div></div> <div class="main-box svelte-v6mqcw"><div class="messages svelte-v6mqcw"><h3 style="color: white;">Messages:</h3> <div></div> <!--[-->`;
+  $$payload.out += `<div class="chat-container svelte-v6mqcw"><div class="TopicList svelte-v6mqcw"><button class="svelte-v6mqcw">Internet effect on jobs</button> <button class="svelte-v6mqcw">Arrival of AI vs Internet</button> <button class="svelte-v6mqcw">The possible increase in donuts sales with the arrival of AI</button> <button class="svelte-v6mqcw">Will the machines rise up? Did people think toasters would rise up?</button> <input${attr("value", input)} placeholder="Custom Topic..." class="svelte-v6mqcw"> <div class="marginLeft svelte-v6mqcw"><button class="svelte-v6mqcw">Start Custom Topic</button></div></div> <div class="main-box svelte-v6mqcw"><div class="messages svelte-v6mqcw"><h3 style="color: white;">Messages:</h3> <div></div> <!--[-->`;
   for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
     let msg = each_array[$$index];
     $$payload.out += `<div class="message svelte-v6mqcw"${attr_style(`background-color: ${stringify(msg.chat_color)}`)}><strong>${escape_html(msg.bot)}:</strong> ${escape_html(msg.text)}</div>`;
   }
-  $$payload.out += `<!--]--></div> <div class="marginLeft svelte-v6mqcw"><button class="svelte-v6mqcw">Continue Talking</button></div></div></div>`;
+  $$payload.out += `<!--]--> `;
+  Loading($$payload);
+  $$payload.out += `<!----></div> <div class="marginLeft svelte-v6mqcw"><button class="svelte-v6mqcw">Continue Talking</button></div></div> `;
+  {
+    $$payload.out += "<!--[!-->";
+  }
+  $$payload.out += `<!--]--></div>`;
+  pop();
 }
 function Header($$payload) {
   $$payload.out += `<div class="mainHeader svelte-9p7725"><h1 class="Title svelte-9p7725">The impact of AI in today's journalism stuff but in Comic Sans</h1></div>`;

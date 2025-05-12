@@ -5,6 +5,8 @@
 	let messages: { bot: string; text: string; chat_color: string }[] = [];
 	let input = '';
 	let session_id = '';
+	let debugging_log: boolean = false;
+	let debug_msg: unknown = null;
 
 	async function startConversation() {
 		if (!input.trim()) return;
@@ -34,6 +36,7 @@
 			];
 		} catch (error) {
 			console.error('Fetch error:', error);
+			debug_msg = error;
 		} finally {
 			loading.setLoading(false);
 		}
@@ -64,6 +67,7 @@
 			];
 		} catch (error) {
 			console.error('Fetch error:', error);
+			debug_msg = error;
 		} finally {
 			loading.setLoading(false);
 		}
@@ -80,29 +84,25 @@
 		>
 		<button
 			on:click={() => {
-				input = 'Anything';
+				input = 'The effects of AI and how it relates to the arrival of the internet';
 				startConversation();
-			}}>To do...</button
+			}}>Arrival of AI vs Internet</button
 		>
 		<button
 			on:click={() => {
-				input = 'Anything';
+				input = 'The possible increase in donuts sales with the arrival of AI';
 				startConversation();
-			}}>To do...</button
+			}}>The possible increase in donuts sales with the arrival of AI</button
 		>
 		<button
 			on:click={() => {
-				input = 'Anything';
+				input = 'Will the machines rise up? Did people think toasters would rise up?';
 				startConversation();
-			}}>To do...</button
+			}}>Will the machines rise up? Did people think toasters would rise up?</button
 		>
-		<input
-			bind:value={input}
-			on:keydown={(e) => e.key === 'Enter' && startConversation()}
-			placeholder="Custom Topic..."
-		/>
+		<input bind:value={input} placeholder="Custom Topic..." />
 
-		<div class="marginLeft"><button on:click={startConversation}>Start New Topic</button></div>
+		<div class="marginLeft"><button on:click={startConversation}>Start Custom Topic</button></div>
 	</div>
 
 	<div class="main-box">
@@ -120,6 +120,12 @@
 		</div>
 		<div class="marginLeft"><button on:click={continueConversation}>Continue Talking</button></div>
 	</div>
+
+	{#if debugging_log}
+		<div>
+			<p>Error: {debug_msg}</p>
+		</div>
+	{/if}
 </div>
 
 <style>

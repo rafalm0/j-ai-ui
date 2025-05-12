@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { loading } from '$lib/components/loading';
+	import Loading from '$lib/components/Loading.svelte';
+
 	let messages: { bot: string; text: string; chat_color: string }[] = [];
 	let input = '';
 	let session_id = '';
 
 	async function startConversation() {
 		if (!input.trim()) return;
+		loading.setLoading(true, "I'm loading");
 
 		messages = [];
 		const body = JSON.stringify({
@@ -20,18 +24,24 @@
 			body
 		};
 
-		const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
-		const data = await response.json();
-
-		session_id = data.session_id;
-		messages = [
-			...messages,
-			{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
-		];
+		try {
+			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
+			const data = await response.json();
+			session_id = data.session_id;
+			messages = [
+				...messages,
+				{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
+			];
+		} catch (error) {
+			console.error('Fetch error:', error);
+		} finally {
+			loading.setLoading(false);
+		}
 	}
 
 	async function continueConversation() {
 		if (!session_id) return;
+		loading.setLoading(true, "I'm loading");
 
 		const body = JSON.stringify({
 			topic: '', // No need to resend topic
@@ -44,14 +54,19 @@
 			headers: { 'Content-Type': 'application/json' },
 			body
 		};
+		try {
+			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
+			const data = await response.json();
 
-		const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
-		const data = await response.json();
-
-		messages = [
-			...messages,
-			{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
-		];
+			messages = [
+				...messages,
+				{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
+			];
+		} catch (error) {
+			console.error('Fetch error:', error);
+		} finally {
+			loading.setLoading(false);
+		}
 	}
 </script>
 
@@ -86,6 +101,7 @@
 			on:keydown={(e) => e.key === 'Enter' && startConversation()}
 			placeholder="Custom Topic..."
 		/>
+
 		<div class="marginLeft"><button on:click={startConversation}>Start New Topic</button></div>
 	</div>
 
@@ -100,6 +116,7 @@
 					{msg.text}
 				</div>
 			{/each}
+			<Loading />
 		</div>
 		<div class="marginLeft"><button on:click={continueConversation}>Continue Talking</button></div>
 	</div>

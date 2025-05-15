@@ -92,17 +92,18 @@
 			on:click={() => {
 				input = 'The possible increase in donuts sales with the arrival of AI';
 				startConversation();
-			}}>The possible increase in donuts sales with the arrival of AI</button
+			}}>The increase in donuts sales since AI</button
 		>
 		<button
 			on:click={() => {
-				input = 'Will the machines rise up? Did people think toasters would rise up?';
+				input = 'Did people think toasters would rise up with the arrival of the internet? ';
 				startConversation();
-			}}>Will the machines rise up? Did people think toasters would rise up?</button
+			}}>Did people think toasters would rise up?</button
 		>
-		<input bind:value={input} placeholder="Custom Topic..." />
-
-		<div class="marginLeft"><button on:click={startConversation}>Start Custom Topic</button></div>
+		<div class="custom-input-div">
+			<input class="custom-input-field" bind:value={input} placeholder="Custom Topic..." />
+			<button class="custom-input-button" on:click={startConversation}>→</button>
+		</div>
 	</div>
 
 	<div class="main-box">
@@ -118,7 +119,9 @@
 			{/each}
 			<Loading />
 		</div>
-		<div class="marginLeft"><button on:click={continueConversation}>Continue Talking</button></div>
+		<div class="continue-conv-button">
+			<button on:click={continueConversation}>Continue Talking</button>
+		</div>
 	</div>
 
 	{#if debugging_log}
@@ -129,10 +132,35 @@
 </div>
 
 <style>
+	input {
+		flex: 1;
+		max-height: 100px;
+		width: calc(79%);
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid #ccc;
+		@media (max-width: 900px) {
+			max-height: 50px;
+		}
+	}
+
+	button {
+		padding: 0.5rem 1rem;
+		border: none;
+		background-color: #0077cc;
+		color: white;
+		border-radius: 0.5rem;
+		cursor: pointer;
+	}
+
 	.chat-container {
 		width: 100%;
 		min-height: 500px;
 		display: grid;
+		@media (max-width: 900px) {
+			display: flex;
+			flex-direction: column;
+		}
 		grid:
 			'TopicList messages' 1fr
 			/ 20% auto;
@@ -156,10 +184,10 @@
 		border-radius: 1rem;
 		padding: 1rem;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	}
-
-	.marginLeft {
-		margin-left: auto;
+		@media (max-width: 900px) {
+			gap: 8px;
+			min-height: 200px;
+		}
 	}
 
 	.main-box {
@@ -189,21 +217,30 @@
 		background-color: var(--bg, white);
 	}
 
-	input {
-		flex: 1;
-		max-height: 100px;
-		padding: 0.5rem;
-		border-radius: 0.5rem;
-		border: 1px solid #ccc;
+	.custom-input-button {
+		width: 20%;
+		border-top-left-radius: 0rem;
+		border-bottom-left-radius: 0rem;
 	}
 
-	button {
-		padding: 0.5rem 1rem;
-		border: none;
-		background-color: #0077cc;
-		color: white;
-		border-radius: 0.5rem;
-		cursor: pointer;
+	.custom-input-button {
+		width: 20%;
+		border-top-left-radius: 0rem;
+		border-bottom-left-radius: 0rem;
+	}
+
+	.custom-input-div {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.custom-input-field {
+		border-top-right-radius: 0rem;
+		border-bottom-right-radius: 0rem;
+	}
+
+	.continue-conv-button {
+		margin-left: auto;
 	}
 
 	button:hover {

@@ -54,14 +54,14 @@ function Chatbot($$payload, $$props) {
   let messages = [];
   let input = "";
   const each_array = ensure_array_like(messages);
-  $$payload.out += `<div class="chat-container svelte-v6mqcw"><div class="TopicList svelte-v6mqcw"><button class="svelte-v6mqcw">Internet effect on jobs</button> <button class="svelte-v6mqcw">Arrival of AI vs Internet</button> <button class="svelte-v6mqcw">The possible increase in donuts sales with the arrival of AI</button> <button class="svelte-v6mqcw">Will the machines rise up? Did people think toasters would rise up?</button> <input${attr("value", input)} placeholder="Custom Topic..." class="svelte-v6mqcw"> <div class="marginLeft svelte-v6mqcw"><button class="svelte-v6mqcw">Start Custom Topic</button></div></div> <div class="main-box svelte-v6mqcw"><div class="messages svelte-v6mqcw"><h3 style="color: white;">Messages:</h3> <div></div> <!--[-->`;
+  $$payload.out += `<div class="chat-container svelte-gwetxn"><div class="TopicList svelte-gwetxn"><button class="svelte-gwetxn">Internet effect on jobs</button> <button class="svelte-gwetxn">Arrival of AI vs Internet</button> <button class="svelte-gwetxn">The increase in donuts sales since AI</button> <button class="svelte-gwetxn">Did people think toasters would rise up?</button> <div class="custom-input-div svelte-gwetxn"><input class="custom-input-field svelte-gwetxn"${attr("value", input)} placeholder="Custom Topic..."> <button class="custom-input-button svelte-gwetxn">→</button></div></div> <div class="main-box svelte-gwetxn"><div class="messages svelte-gwetxn"><h3 style="color: white;">Messages:</h3> <div></div> <!--[-->`;
   for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
     let msg = each_array[$$index];
-    $$payload.out += `<div class="message svelte-v6mqcw"${attr_style(`background-color: ${stringify(msg.chat_color)}`)}><strong>${escape_html(msg.bot)}:</strong> ${escape_html(msg.text)}</div>`;
+    $$payload.out += `<div class="message svelte-gwetxn"${attr_style(`background-color: ${stringify(msg.chat_color)}`)}><strong>${escape_html(msg.bot)}:</strong> ${escape_html(msg.text)}</div>`;
   }
   $$payload.out += `<!--]--> `;
   Loading($$payload);
-  $$payload.out += `<!----></div> <div class="marginLeft svelte-v6mqcw"><button class="svelte-v6mqcw">Continue Talking</button></div></div> `;
+  $$payload.out += `<!----></div> <div class="continue-conv-button svelte-gwetxn"><button class="svelte-gwetxn">Continue Talking</button></div></div> `;
   {
     $$payload.out += "<!--[!-->";
   }

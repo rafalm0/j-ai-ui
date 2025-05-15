@@ -13,7 +13,7 @@
 <!-- {$loading.status} -->
 
 {#if $loading.status === 'LOADING'}
-	<div />
+	<div></div>
 {/if}
 
 <style>

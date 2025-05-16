@@ -56,7 +56,7 @@
 		current_topic = input;
 
 		await comm({
-			topic: input,
+			topic: current_topic,
 			session_id: session_id || null,
 			continue_conversation: true
 		});
@@ -76,35 +76,45 @@
 
 <div class="chat-container">
 	<div class="TopicList">
-		<button
-			on:click={() => {
-				input = 'The effects of the Internet on journalist jobs';
-				startConversation();
-			}}>Internet effect on jobs</button
-		>
-		<button
-			on:click={() => {
-				input = 'The effects of AI and how it relates to the arrival of the internet';
-				startConversation();
-			}}>Arrival of AI vs Internet</button
-		>
-		<button
-			on:click={() => {
-				input = 'The possible increase in donuts sales with the arrival of AI';
-				startConversation();
-			}}>The increase in donuts sales since AI</button
-		>
-		<button
-			on:click={() => {
-				input = 'Did people think toasters would rise up with the arrival of the internet? ';
-				startConversation();
-			}}>Did people think toasters would rise up?</button
-		>
+		<div class="column-combo">
+			<div class="column-topic">
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'The effects of the Internet on journalist jobs';
+						startConversation();
+					}}>Internet effect on jobs</button
+				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'The effects of AI and how it relates to the arrival of the internet';
+						startConversation();
+					}}>Arrival of AI vs Internet</button
+				>
+			</div>
+			<div class="column-topic">
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'The possible increase in donuts sales with the arrival of AI';
+						startConversation();
+					}}>The increase in donuts sales since AI</button
+				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'Did people think toasters would rise up with the arrival of the internet? ';
+						startConversation();
+					}}>Did people think toasters would rise up?</button
+				>
+			</div>
+		</div>
+
 		<div class="custom-input-div">
 			<input class="custom-input-field" bind:value={input} placeholder="Custom Topic..." />
 			<button class="custom-input-button" on:click={startConversation}>→</button>
 		</div>
-		<button on:click={RestartConversation}>🗑️ Clear</button>
 	</div>
 
 	<div class="main-box">
@@ -121,6 +131,7 @@
 			<Loading />
 		</div>
 		<div class="continue-conv-button">
+			<button class="clear-button" on:click={RestartConversation}>🗑️ Clear</button>
 			<button on:click={continueConversation}>Continue Talking</button>
 		</div>
 	</div>
@@ -188,7 +199,20 @@
 		@media (max-width: 900px) {
 			gap: 8px;
 			min-height: 200px;
+			/* max-height: max-content; */
 		}
+	}
+
+	.column-combo {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.column-topic {
+		display: flex;
+		flex-direction: row;
+		gap: 10px;
 	}
 
 	.main-box {
@@ -218,10 +242,8 @@
 		background-color: var(--bg, white);
 	}
 
-	.custom-input-button {
-		width: 20%;
-		border-top-left-radius: 0rem;
-		border-bottom-left-radius: 0rem;
+	.topic-option {
+		width: 50%;
 	}
 
 	.custom-input-button {
@@ -241,7 +263,12 @@
 	}
 
 	.continue-conv-button {
+		display: flex;
+		flex-direction: row;
 		margin-left: auto;
+	}
+	.clear-button {
+		margin-right: 20px;
 	}
 
 	button:hover {

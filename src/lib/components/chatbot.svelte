@@ -4,22 +4,21 @@
 
 	let messages: { bot: string; text: string; chat_color: string }[] = [];
 	let input = '';
+	let current_topic = '';
 	let session_id = '';
 	let debugging_log: boolean = false;
 	let debug_msg: unknown = null;
 
-	async function startConversation() {
-		if (!input.trim()) return;
-		loading.setLoading(true, "I'm loading");
-
-		messages = [];
-		const body = JSON.stringify({
-			topic: input,
-			session_id: session_id || null,
-			continue_conversation: false
-		});
+	async function comm(bodyData: {
+		topic: string;
+		session_id: string | null;
+		continue_conversation: boolean | false;
+	}) {
 		input = '';
+		loading.setLoading(true, "I'm loading");
+		current_topic = bodyData.topic;
 
+		const body = JSON.stringify(bodyData);
 		const options = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -30,6 +29,7 @@
 			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
 			const data = await response.json();
 			session_id = data.session_id;
+
 			messages = [
 				...messages,
 				{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
@@ -42,35 +42,35 @@
 		}
 	}
 
+	async function RestartConversation() {
+		session_id = '';
+		current_topic = '';
+
+		messages = [];
+		input = '';
+		return;
+	}
+
+	async function startConversation() {
+		if (!input.trim()) return;
+		current_topic = input;
+
+		await comm({
+			topic: input,
+			session_id: session_id || null,
+			continue_conversation: true
+		});
+		input = '';
+	}
+
 	async function continueConversation() {
 		if (!session_id) return;
-		loading.setLoading(true, "I'm loading");
 
-		const body = JSON.stringify({
-			topic: '', // No need to resend topic
+		await comm({
+			topic: current_topic,
 			session_id,
 			continue_conversation: true
 		});
-
-		const options = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body
-		};
-		try {
-			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
-			const data = await response.json();
-
-			messages = [
-				...messages,
-				{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
-			];
-		} catch (error) {
-			console.error('Fetch error:', error);
-			debug_msg = error;
-		} finally {
-			loading.setLoading(false);
-		}
 	}
 </script>
 
@@ -104,6 +104,7 @@
 			<input class="custom-input-field" bind:value={input} placeholder="Custom Topic..." />
 			<button class="custom-input-button" on:click={startConversation}>→</button>
 		</div>
+		<button on:click={RestartConversation}>🗑️ Clear</button>
 	</div>
 
 	<div class="main-box">

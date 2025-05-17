@@ -211,7 +211,10 @@
 
 	.column-topic {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
+		@media (max-width: 900px) {
+			flex-direction: row;
+		}
 		gap: 10px;
 	}
 
@@ -243,7 +246,10 @@
 	}
 
 	.topic-option {
-		width: 50%;
+		width: 100%;
+		@media (max-width: 900px) {
+			width: 50%;
+		}
 	}
 
 	.custom-input-button {

@@ -4,22 +4,21 @@
 
 	let messages: { bot: string; text: string; chat_color: string }[] = [];
 	let input = '';
+	let current_topic = '';
 	let session_id = '';
 	let debugging_log: boolean = false;
 	let debug_msg: unknown = null;
 
-	async function startConversation() {
-		if (!input.trim()) return;
-		loading.setLoading(true, "I'm loading");
-
-		messages = [];
-		const body = JSON.stringify({
-			topic: input,
-			session_id: session_id || null,
-			continue_conversation: false
-		});
+	async function comm(bodyData: {
+		topic: string;
+		session_id: string | null;
+		continue_conversation: boolean | false;
+	}) {
 		input = '';
+		loading.setLoading(true, "I'm loading");
+		current_topic = bodyData.topic;
 
+		const body = JSON.stringify(bodyData);
 		const options = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -30,6 +29,7 @@
 			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
 			const data = await response.json();
 			session_id = data.session_id;
+
 			messages = [
 				...messages,
 				{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
@@ -42,64 +42,75 @@
 		}
 	}
 
+	async function RestartConversation() {
+		session_id = '';
+		current_topic = '';
+
+		messages = [];
+		input = '';
+		return;
+	}
+
+	async function startConversation() {
+		if (!input.trim()) return;
+		current_topic = input;
+
+		await comm({
+			topic: current_topic,
+			session_id: session_id || null,
+			continue_conversation: true
+		});
+		input = '';
+	}
+
 	async function continueConversation() {
 		if (!session_id) return;
-		loading.setLoading(true, "I'm loading");
 
-		const body = JSON.stringify({
-			topic: '', // No need to resend topic
+		await comm({
+			topic: current_topic,
 			session_id,
 			continue_conversation: true
 		});
-
-		const options = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body
-		};
-		try {
-			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
-			const data = await response.json();
-
-			messages = [
-				...messages,
-				{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
-			];
-		} catch (error) {
-			console.error('Fetch error:', error);
-			debug_msg = error;
-		} finally {
-			loading.setLoading(false);
-		}
 	}
 </script>
 
 <div class="chat-container">
 	<div class="TopicList">
-		<button
-			on:click={() => {
-				input = 'The effects of the Internet on journalist jobs';
-				startConversation();
-			}}>Internet effect on jobs</button
-		>
-		<button
-			on:click={() => {
-				input = 'The effects of AI and how it relates to the arrival of the internet';
-				startConversation();
-			}}>Arrival of AI vs Internet</button
-		>
-		<button
-			on:click={() => {
-				input = 'The possible increase in donuts sales with the arrival of AI';
-				startConversation();
-			}}>The increase in donuts sales since AI</button
-		>
-		<button
-			on:click={() => {
-				input = 'Did people think toasters would rise up with the arrival of the internet? ';
-				startConversation();
-			}}>Did people think toasters would rise up?</button
-		>
+		<div class="column-combo">
+			<div class="column-topic">
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'The effects of the Internet on journalist jobs';
+						startConversation();
+					}}>Internet effect on jobs</button
+				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'The effects of AI and how it relates to the arrival of the internet';
+						startConversation();
+					}}>Arrival of AI vs Internet</button
+				>
+			</div>
+			<div class="column-topic">
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'The possible increase in donuts sales with the arrival of AI';
+						startConversation();
+					}}>The increase in donuts sales since AI</button
+				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'Did people think toasters would rise up with the arrival of the internet? ';
+						startConversation();
+					}}>Did people think toasters would rise up?</button
+				>
+			</div>
+		</div>
+
 		<div class="custom-input-div">
 			<input class="custom-input-field" bind:value={input} placeholder="Custom Topic..." />
 			<button class="custom-input-button" on:click={startConversation}>→</button>
@@ -120,6 +131,7 @@
 			<Loading />
 		</div>
 		<div class="continue-conv-button">
+			<button class="clear-button" on:click={RestartConversation}>🗑️ Clear</button>
 			<button on:click={continueConversation}>Continue Talking</button>
 		</div>
 	</div>
@@ -187,7 +199,23 @@
 		@media (max-width: 900px) {
 			gap: 8px;
 			min-height: 200px;
+			/* max-height: max-content; */
 		}
+	}
+
+	.column-combo {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.column-topic {
+		display: flex;
+		flex-direction: column;
+		@media (max-width: 900px) {
+			flex-direction: row;
+		}
+		gap: 10px;
 	}
 
 	.main-box {
@@ -217,10 +245,11 @@
 		background-color: var(--bg, white);
 	}
 
-	.custom-input-button {
-		width: 20%;
-		border-top-left-radius: 0rem;
-		border-bottom-left-radius: 0rem;
+	.topic-option {
+		width: 100%;
+		@media (max-width: 900px) {
+			width: 50%;
+		}
 	}
 
 	.custom-input-button {
@@ -240,7 +269,12 @@
 	}
 
 	.continue-conv-button {
+		display: flex;
+		flex-direction: row;
 		margin-left: auto;
+	}
+	.clear-button {
+		margin-right: 20px;
 	}
 
 	button:hover {

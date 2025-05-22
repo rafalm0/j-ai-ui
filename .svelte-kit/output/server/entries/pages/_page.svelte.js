@@ -54,14 +54,14 @@ function Chatbot($$payload, $$props) {
   let messages = [];
   let input = "";
   const each_array = ensure_array_like(messages);
-  $$payload.out += `<div class="chat-container svelte-gwetxn"><div class="TopicList svelte-gwetxn"><button class="svelte-gwetxn">Internet effect on jobs</button> <button class="svelte-gwetxn">Arrival of AI vs Internet</button> <button class="svelte-gwetxn">The increase in donuts sales since AI</button> <button class="svelte-gwetxn">Did people think toasters would rise up?</button> <div class="custom-input-div svelte-gwetxn"><input class="custom-input-field svelte-gwetxn"${attr("value", input)} placeholder="Custom Topic..."> <button class="custom-input-button svelte-gwetxn">→</button></div></div> <div class="main-box svelte-gwetxn"><div class="messages svelte-gwetxn"><h3 style="color: white;">Messages:</h3> <div></div> <!--[-->`;
+  $$payload.out += `<div class="chat-container svelte-1ku30ya"><div class="TopicList svelte-1ku30ya"><div class="column-combo svelte-1ku30ya"><div class="column-topic svelte-1ku30ya"><button class="topic-option svelte-1ku30ya">Internet effect on jobs</button> <button class="topic-option svelte-1ku30ya">Arrival of AI vs Internet</button></div> <div class="column-topic svelte-1ku30ya"><button class="topic-option svelte-1ku30ya">The increase in donuts sales since AI</button> <button class="topic-option svelte-1ku30ya">Did people think toasters would rise up?</button></div></div> <div class="custom-input-div svelte-1ku30ya"><input class="custom-input-field svelte-1ku30ya"${attr("value", input)} placeholder="Custom Topic..."> <button class="custom-input-button svelte-1ku30ya">→</button></div></div> <div class="main-box svelte-1ku30ya"><div class="messages svelte-1ku30ya"><h3 style="color: white;">Messages:</h3> <div></div> <!--[-->`;
   for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
     let msg = each_array[$$index];
-    $$payload.out += `<div class="message svelte-gwetxn"${attr_style(`background-color: ${stringify(msg.chat_color)}`)}><strong>${escape_html(msg.bot)}:</strong> ${escape_html(msg.text)}</div>`;
+    $$payload.out += `<div class="message svelte-1ku30ya"${attr_style(`background-color: ${stringify(msg.chat_color)}`)}><strong>${escape_html(msg.bot)}:</strong> ${escape_html(msg.text)}</div>`;
   }
   $$payload.out += `<!--]--> `;
   Loading($$payload);
-  $$payload.out += `<!----></div> <div class="continue-conv-button svelte-gwetxn"><button class="svelte-gwetxn">Continue Talking</button></div></div> `;
+  $$payload.out += `<!----></div> <div class="continue-conv-button svelte-1ku30ya"><button class="clear-button svelte-1ku30ya">🗑️ Clear</button> <button class="svelte-1ku30ya">Continue Talking</button></div></div> `;
   {
     $$payload.out += "<!--[!-->";
   }
@@ -69,7 +69,7 @@ function Chatbot($$payload, $$props) {
   pop();
 }
 function Header($$payload) {
-  $$payload.out += `<div class="mainHeader svelte-9p7725"><h1 class="Title svelte-9p7725">The impact of AI in today's journalism stuff but in Comic Sans</h1></div>`;
+  $$payload.out += `<div class="mainHeader svelte-122vhuy"><h1 class="Title svelte-122vhuy">The impact of AI in today's journalism.</h1> <h2 class="svelte-122vhuy">An conversation between two AIs from different times.</h2></div>`;
 }
 function _page($$payload) {
   $$payload.out += `<div class="Page svelte-1svl7lg">`;

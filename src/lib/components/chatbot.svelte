@@ -8,11 +8,13 @@
 	let session_id = '';
 	let debugging_log: boolean = false;
 	let debug_msg: unknown = null;
+	let cite: boolean = false;
 
 	async function comm(bodyData: {
 		topic: string;
 		session_id: string | null;
 		continue_conversation: boolean | false;
+		cite: boolean | false;
 	}) {
 		input = '';
 		loading.setLoading(true, "I'm loading");
@@ -58,7 +60,8 @@
 		await comm({
 			topic: current_topic,
 			session_id: session_id || null,
-			continue_conversation: true
+			continue_conversation: true,
+			cite: cite
 		});
 		input = '';
 	}
@@ -69,7 +72,8 @@
 		await comm({
 			topic: current_topic,
 			session_id,
-			continue_conversation: true
+			continue_conversation: true,
+			cite: cite
 		});
 	}
 </script>
@@ -115,10 +119,18 @@
 			<input class="custom-input-field" bind:value={input} placeholder="Custom Topic..." />
 			<button class="custom-input-button" on:click={startConversation}>→</button>
 		</div>
+		<label>
+			<input
+				type="checkbox"
+				bind:checked={cite}
+				style="width:20px;padding:10px;margin-right:10px"
+			/>
+			<h style="color:white">Citations</h>
+		</label>
 	</div>
 
 	<div class="main-box">
-		<div class="messages">
+		<div class="messages" id="main_message_box">
 			<h3 style="color: white;">Messages:</h3>
 			<div></div>
 			{#each messages as msg}
@@ -128,7 +140,9 @@
 					{msg.text}
 				</div>
 			{/each}
-			<Loading />
+			<div class="message" style="background-color: transparent" id="loading_id">
+				<Loading />
+			</div>
 		</div>
 		<div class="continue-conv-button">
 			<button class="clear-button" on:click={RestartConversation}>🗑️ Clear</button>
@@ -151,7 +165,7 @@
 		padding: 0.5rem;
 		border-radius: 0.5rem;
 		border: 1px solid #ccc;
-		@media (max-width: 900px) {
+		@media (max-width: 1000px) {
 			max-height: 50px;
 		}
 	}
@@ -169,10 +183,11 @@
 		width: 100%;
 		min-height: 500px;
 		display: grid;
-		@media (max-width: 900px) {
+		@media (max-width: 800px) {
 			display: flex;
 			flex-direction: column;
 		}
+		max-height: 80%;
 		grid:
 			'TopicList messages' 1fr
 			/ 20% auto;
@@ -186,8 +201,7 @@
 	.TopicList {
 		grid-area: TopicList;
 		width: 100%;
-		min-height: 400px;
-		max-height: 50vh;
+		height: fit-content;
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
@@ -196,10 +210,8 @@
 		border-radius: 1rem;
 		padding: 1rem;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-		@media (max-width: 900px) {
+		@media (max-width: 800px) {
 			gap: 8px;
-			min-height: 200px;
-			/* max-height: max-content; */
 		}
 	}
 
@@ -212,7 +224,7 @@
 	.column-topic {
 		display: flex;
 		flex-direction: column;
-		@media (max-width: 900px) {
+		@media (max-width: 800px) {
 			flex-direction: row;
 		}
 		gap: 10px;
@@ -235,6 +247,7 @@
 		margin-bottom: 1rem;
 		gap: 16px;
 		width: 100%;
+		padding-right: 10px;
 		justify-content: flex-start;
 	}
 
@@ -247,7 +260,7 @@
 
 	.topic-option {
 		width: 100%;
-		@media (max-width: 900px) {
+		@media (max-width: 800px) {
 			width: 50%;
 		}
 	}

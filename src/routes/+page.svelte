@@ -10,7 +10,6 @@
 
 <style>
 	.Page {
-		position: absolute;
 		display: flex;
 		height: calc(100%);
 		width: calc(100%);

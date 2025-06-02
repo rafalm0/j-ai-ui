@@ -41,6 +41,7 @@
 			debug_msg = error;
 		} finally {
 			loading.setLoading(false);
+			document.getElementById('main_message_box')?.scrollTo(0, -2000);
 		}
 	}
 
@@ -96,27 +97,59 @@
 						startConversation();
 					}}>Arrival of AI vs Internet</button
 				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'Politics';
+						startConversation();
+					}}>Politics</button
+				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'Socio-Economical trends';
+						startConversation();
+					}}>Socio-Economical trends</button
+				>
 			</div>
 			<div class="column-topic">
 				<button
 					class="topic-option"
 					on:click={() => {
-						input = 'The possible increase in donuts sales with the arrival of AI';
+						input = 'Art';
 						startConversation();
-					}}>The increase in donuts sales since AI</button
+					}}>Art</button
 				>
 				<button
 					class="topic-option"
 					on:click={() => {
-						input = 'Did people think toasters would rise up with the arrival of the internet? ';
+						input = 'jobs';
 						startConversation();
-					}}>Did people think toasters would rise up?</button
+					}}>Jobs</button
+				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'Education';
+						startConversation();
+					}}>Education</button
+				>
+				<button
+					class="topic-option"
+					on:click={() => {
+						input = 'Technology';
+						startConversation();
+					}}>Technology</button
 				>
 			</div>
 		</div>
 
 		<div class="custom-input-div">
-			<input class="custom-input-field" bind:value={input} placeholder="Custom Topic..." />
+			<input
+				class="custom-input-field"
+				bind:value={input}
+				placeholder="Write your own topic here"
+			/>
 			<button class="custom-input-button" on:click={startConversation}>→</button>
 		</div>
 		<label>
@@ -134,7 +167,6 @@
 			<h3 style="color: white;">Messages:</h3>
 			<div></div>
 			{#each messages as msg}
-				<!-- <pre>{JSON.stringify(msg)}</pre> -->
 				<div class="message" style="background-color: {msg.chat_color}">
 					<strong>{msg.bot}:</strong>
 					{msg.text}

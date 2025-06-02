@@ -3,6 +3,7 @@
 
 <div class="mainHeader">
 	<h1 class="Title">The impact of AI in today's journalism.</h1>
+	<div style="height: 10px;"></div>
 	<h2>An conversation between two AIs from different times.</h2>
 </div>
 
@@ -10,11 +11,12 @@
 	.mainHeader {
 		background-color: null;
 		min-height: 70px;
+		padding: 1rem;
 	}
 
 	.Title {
 		color: white;
-		font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+		/* font-family: 'Comic Sans MS', 'Comic Sans', cursive; */
 		/* min-height: 100px; */
 		height: 4vh;
 		padding-left: calc(2%);
@@ -22,8 +24,8 @@
 	}
 	h2 {
 		color: white;
-		font-family: 'Comic Sans MS', 'Comic Sans', cursive;
-		font-size: small;
+		/* font-family: 'Comic Sans MS', 'Comic Sans', cursive; */
+		/* font-size: small; */
 		height: 0.9vh;
 		padding-left: calc(5%);
 	}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { loading } from '$lib/components/loading';
+	import EmojiPicker from 'svelte-emoji-picker';
 	import Loading from '$lib/components/Loading.svelte';
 
 	let messages: { bot: string; text: string; chat_color: string }[] = [];
@@ -9,11 +10,11 @@
 	let debugging_log: boolean = false;
 	let debug_msg: unknown = null;
 	let cite: boolean = false;
+	let emoji_text = '';
 
 	async function comm(bodyData: {
 		topic: string;
 		session_id: string | null;
-		continue_conversation: boolean | false;
 		cite: boolean | false;
 	}) {
 		input = '';
@@ -30,7 +31,7 @@
 		try {
 			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
 			const data = await response.json();
-			session_id = data.session_id;
+			session_id = String(data.session_id);
 
 			messages = [
 				...messages,
@@ -39,9 +40,25 @@
 		} catch (error) {
 			console.error('Fetch error:', error);
 			debug_msg = error;
+			// Optionally, add an error message to the display
+			messages = [
+				...messages,
+				{
+					bot: 'System',
+					text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+					chat_color: '#ff0000'
+				}
+			];
 		} finally {
 			loading.setLoading(false);
-			document.getElementById('main_message_box')?.scrollTo(0, -2000);
+			const messageDiv = document.getElementById('main_message_box');
+			if (messageDiv) {
+				// Use a slight delay to ensure content has rendered before scrolling
+				setTimeout(() => {
+					// messageDiv.scrollTop = messageDiv.scrollHeight;
+					messageDiv.scrollTo(0, -2000);
+				}, 100);
+			}
 		}
 	}
 
@@ -61,7 +78,6 @@
 		await comm({
 			topic: current_topic,
 			session_id: session_id || null,
-			continue_conversation: true,
 			cite: cite
 		});
 		input = '';
@@ -73,7 +89,6 @@
 		await comm({
 			topic: current_topic,
 			session_id,
-			continue_conversation: true,
 			cite: cite
 		});
 	}
@@ -170,6 +185,8 @@
 				<div class="message" style="background-color: {msg.chat_color}">
 					<strong>{msg.bot}:</strong>
 					{msg.text}
+					<button>upvote(not implemented yet)</button>
+					<EmojiPicker bind:value={emoji_text} />
 				</div>
 			{/each}
 			<div class="message" style="background-color: transparent" id="loading_id">

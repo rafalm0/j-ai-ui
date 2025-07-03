@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { loading } from '$lib/components/loading';
-	import EmojiPicker from 'svelte-emoji-picker';
+	// import EmojiPicker from 'svelte-emoji-picker';
 	import Loading from '$lib/components/Loading.svelte';
+	import Modal from '$lib/components/chatbot.svelte';
 
 	let messages: { bot: string; text: string; chat_color: string; message_id: string }[] = $state(
 		[]
@@ -14,7 +15,7 @@
 	let cite: boolean = $state(false);
 	let emoji_text = $state('');
 	let message_id = $state('');
-	let showEmojiPicker = $state(false);
+	let showModal = $state(false);
 	let emoji_button = $state('+');
 
 	async function comm(bodyData: {
@@ -128,18 +129,19 @@
 			reactToEmojiChange(emoji_text, message_id);
 			emoji_text = '';
 			message_id = '';
-			showEmojiPicker = false;
+			showModal = false;
+			emoji_button = '+';
 		}
 	});
 
 	function openEmojiPicker(id: string) {
-		if (!showEmojiPicker) {
+		if (!showModal) {
 			message_id = id;
-			showEmojiPicker = true;
+			showModal = true;
 			emoji_button = '-';
 		} else {
 			message_id = '';
-			showEmojiPicker = false;
+			showModal = false;
 			emoji_button = '+';
 		}
 	}
@@ -236,12 +238,61 @@
 				<div class="message" style="background-color: {msg.chat_color}">
 					<strong>{msg.bot}:</strong>
 					{msg.text}
+
 					<button onclick={() => openEmojiPicker(msg.message_id)}> {@html emoji_button} </button>
 
 					<!-- Emoji Picker only shows for the active message -->
-					{#if showEmojiPicker && message_id === msg.message_id}
+					{#if showModal && message_id === msg.message_id}
 						<div class="emoji-picker-modal">
-							<EmojiPicker bind:value={emoji_text} />
+							<!-- <EmojiPicker bind:value={emoji_text} /> -->
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😀';
+								}}>😀</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😂';
+								}}>😂</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🥰';
+								}}>🥰</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🤑';
+								}}>🤑</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😱';
+								}}>😱</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😭';
+								}}>😭</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🤖';
+								}}>🤖</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🤯';
+								}}>🤯</button
+							>
 						</div>
 					{/if}
 				</div>
@@ -305,7 +356,7 @@
 	}
 
 	.emoji-picker-modal {
-		position: absolute;
+		/* position: absolute; */
 		z-index: 999;
 		top: 100%;
 		left: 0;
@@ -314,6 +365,10 @@
 		background: white;
 		border-radius: 8px;
 		padding: 8px;
+	}
+
+	.emoji_button {
+		background-color: none;
 	}
 
 	.TopicList {

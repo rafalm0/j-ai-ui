@@ -59,5 +59,11 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"@joeattardi/emoji-button": "^4.6.4",
+		"picmo": "^5.8.5",
+		"svelte-emoji-picker": "^1.1.2",
+		"svelte-emoji-selector": "^1.0.1"
+	}
 }

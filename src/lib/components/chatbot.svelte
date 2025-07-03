@@ -1,19 +1,26 @@
 <script lang="ts">
 	import { loading } from '$lib/components/loading';
+	// import EmojiPicker from 'svelte-emoji-picker';
 	import Loading from '$lib/components/Loading.svelte';
+	import Modal from '$lib/components/chatbot.svelte';
 
-	let messages: { bot: string; text: string; chat_color: string }[] = [];
-	let input = '';
+	let messages: { bot: string; text: string; chat_color: string; message_id: string }[] = $state(
+		[]
+	);
+	let input = $state('');
 	let current_topic = '';
 	let session_id = '';
 	let debugging_log: boolean = false;
-	let debug_msg: unknown = null;
-	let cite: boolean = false;
+	let debug_msg: unknown = $state(null);
+	let cite: boolean = $state(false);
+	let emoji_text = $state('');
+	let message_id = $state('');
+	let showModal = $state(false);
+	let emoji_button = $state('+');
 
 	async function comm(bodyData: {
 		topic: string;
 		session_id: string | null;
-		continue_conversation: boolean | false;
 		cite: boolean | false;
 	}) {
 		input = '';
@@ -30,18 +37,40 @@
 		try {
 			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
 			const data = await response.json();
-			session_id = data.session_id;
+			session_id = String(data.session_id);
 
 			messages = [
 				...messages,
-				{ bot: data.bot_name, text: data.response, chat_color: data.chat_color }
+				{
+					bot: data.bot_name,
+					text: data.response,
+					chat_color: data.chat_color,
+					message_id: data.response_id
+				}
 			];
 		} catch (error) {
 			console.error('Fetch error:', error);
 			debug_msg = error;
+			// Optionally, add an error message to the display
+			messages = [
+				...messages,
+				{
+					bot: 'System',
+					text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+					chat_color: '#ff0000',
+					message_id: 'Error'
+				}
+			];
 		} finally {
 			loading.setLoading(false);
-			document.getElementById('main_message_box')?.scrollTo(0, -2000);
+			const messageDiv = document.getElementById('main_message_box');
+			if (messageDiv) {
+				// Use a slight delay to ensure content has rendered before scrolling
+				setTimeout(() => {
+					// messageDiv.scrollTop = messageDiv.scrollHeight;
+					messageDiv.scrollTo(0, -2000);
+				}, 100);
+			}
 		}
 	}
 
@@ -61,7 +90,6 @@
 		await comm({
 			topic: current_topic,
 			session_id: session_id || null,
-			continue_conversation: true,
 			cite: cite
 		});
 		input = '';
@@ -73,9 +101,49 @@
 		await comm({
 			topic: current_topic,
 			session_id,
-			continue_conversation: true,
 			cite: cite
 		});
+	}
+
+	async function reactToEmojiChange(emoji: string, message_id: string) {
+		if (!emoji) return;
+		const body = JSON.stringify({ message_id: String(message_id), emoji: emoji });
+		const options = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body
+		};
+		console.log('Request built and being sent,body:');
+		console.log(body);
+		try {
+			const response = await fetch('https://j-ai-3jvd.onrender.com/react', options);
+			const data = await response.json();
+			console.log(data.message);
+		} catch (error) {
+			console.error('Fetch error:', error);
+		}
+	}
+
+	$effect(() => {
+		if (emoji_text) {
+			reactToEmojiChange(emoji_text, message_id);
+			emoji_text = '';
+			message_id = '';
+			showModal = false;
+			emoji_button = '+';
+		}
+	});
+
+	function openEmojiPicker(id: string) {
+		if (!showModal) {
+			message_id = id;
+			showModal = true;
+			emoji_button = '-';
+		} else {
+			message_id = '';
+			showModal = false;
+			emoji_button = '+';
+		}
 	}
 </script>
 
@@ -85,28 +153,28 @@
 			<div class="column-topic">
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'The effects of the Internet on journalist jobs';
 						startConversation();
 					}}>Internet effect on jobs</button
 				>
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'The effects of AI and how it relates to the arrival of the internet';
 						startConversation();
 					}}>Arrival of AI vs Internet</button
 				>
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'Politics';
 						startConversation();
 					}}>Politics</button
 				>
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'Socio-Economical trends';
 						startConversation();
 					}}>Socio-Economical trends</button
@@ -115,28 +183,28 @@
 			<div class="column-topic">
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'Art';
 						startConversation();
 					}}>Art</button
 				>
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'jobs';
 						startConversation();
 					}}>Jobs</button
 				>
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'Education';
 						startConversation();
 					}}>Education</button
 				>
 				<button
 					class="topic-option"
-					on:click={() => {
+					onclick={() => {
 						input = 'Technology';
 						startConversation();
 					}}>Technology</button
@@ -150,7 +218,7 @@
 				bind:value={input}
 				placeholder="Write your own topic here"
 			/>
-			<button class="custom-input-button" on:click={startConversation}>→</button>
+			<button class="custom-input-button" onclick={startConversation}>→</button>
 		</div>
 		<label>
 			<input
@@ -170,6 +238,63 @@
 				<div class="message" style="background-color: {msg.chat_color}">
 					<strong>{msg.bot}:</strong>
 					{msg.text}
+
+					<button onclick={() => openEmojiPicker(msg.message_id)}> {@html emoji_button} </button>
+
+					<!-- Emoji Picker only shows for the active message -->
+					{#if showModal && message_id === msg.message_id}
+						<div class="emoji-picker-modal">
+							<!-- <EmojiPicker bind:value={emoji_text} /> -->
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😀';
+								}}>😀</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😂';
+								}}>😂</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🥰';
+								}}>🥰</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🤑';
+								}}>🤑</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😱';
+								}}>😱</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '😭';
+								}}>😭</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🤖';
+								}}>🤖</button
+							>
+							<button
+								class="emoji_button"
+								onclick={() => {
+									emoji_text = '🤯';
+								}}>🤯</button
+							>
+						</div>
+					{/if}
 				</div>
 			{/each}
 			<div class="message" style="background-color: transparent" id="loading_id">
@@ -177,8 +302,8 @@
 			</div>
 		</div>
 		<div class="continue-conv-button">
-			<button class="clear-button" on:click={RestartConversation}>🗑️ Clear</button>
-			<button on:click={continueConversation}>Continue Talking</button>
+			<button class="clear-button" onclick={RestartConversation}>🗑️ Clear</button>
+			<button onclick={continueConversation}>Continue Talking</button>
 		</div>
 	</div>
 
@@ -228,6 +353,22 @@
 		border-radius: 1rem;
 		padding: 1rem;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+
+	.emoji-picker-modal {
+		/* position: absolute; */
+		z-index: 999;
+		top: 100%;
+		left: 0;
+		margin-top: 8px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+		background: white;
+		border-radius: 8px;
+		padding: 8px;
+	}
+
+	.emoji_button {
+		background-color: none;
 	}
 
 	.TopicList {

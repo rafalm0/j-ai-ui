@@ -17,6 +17,65 @@
 	let message_id = $state('');
 	let showModal = $state(false);
 	let emoji_button = $state('+');
+	let showConversationList = $state(false);
+	let conversationList: { id: string; Topic: string; name: string; bot1: string; bot2: string }[] =
+		$state([]);
+
+	async function alternateConversationList() {
+		showConversationList = !showConversationList;
+	}
+
+	async function fetchAllConversations() {
+		const options = {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' }
+		};
+		try {
+			const res = await fetch('https://j-ai-3jvd.onrender.com/conversations', options);
+			const data = await res.json();
+			console.log(data.conversations);
+			conversationList = data.conversations;
+		} catch (error) {
+			console.error('Failed to fetch conversations:', error);
+		}
+	}
+
+	async function LoadConv(conv_id: string) {
+		if (!conv_id) return;
+
+		const body = JSON.stringify({ conv_id: conv_id });
+		const options = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body
+		};
+		try {
+			const res = await fetch('https://j-ai-3jvd.onrender.com/conversation', options);
+			const data = await res.json();
+			console.log('loaded chat');
+			console.log(data['messages']);
+			messages = [];
+			let chat_color = '#D0F0FD';
+			for (const msg of data['messages']) {
+				messages = [
+					...messages,
+					{
+						bot: msg.writer,
+						text: msg.message,
+						chat_color: chat_color,
+						message_id: msg.id
+					}
+				];
+				if (chat_color == '#D0F0FD') {
+					chat_color = '#C1F0C1';
+				} else {
+					chat_color = '#D0F0FD';
+				}
+			}
+		} catch (error) {
+			console.error('Failed to fetch conversations:', error);
+		}
+	}
 
 	async function comm(bodyData: {
 		topic: string;
@@ -307,6 +366,40 @@
 		</div>
 	</div>
 
+	<div class="conversations-box">
+		{#if !showConversationList}
+			<button
+				class="showConversationButton"
+				onclick={() => {
+					alternateConversationList();
+					fetchAllConversations();
+				}}>Show</button
+			>
+		{:else}
+			<button
+				class="hideConversationButton"
+				onclick={() => {
+					alternateConversationList();
+				}}>Hide</button
+			>
+			<div class="conversation-list">
+				{#each conversationList as conv}
+					<div class="conversation-preview">
+						<strong>{conv.id} - {conv.name}</strong>
+						<p>{conv.Topic}</p>
+						<small>{conv.bot1} & {conv.bot2}</small>
+						<button
+							class="LoadConvButton"
+							onclick={() => {
+								LoadConv(String(conv.id));
+							}}>Load</button
+						>
+					</div>
+				{/each}
+			</div>
+		{/if}
+	</div>
+
 	{#if debugging_log}
 		<div>
 			<p>Error: {debug_msg}</p>
@@ -346,8 +439,8 @@
 		}
 		max-height: 80%;
 		grid:
-			'TopicList messages' 1fr
-			/ 20% auto;
+			'TopicList main-box conversations-box' auto
+			/ auto 1fr auto;
 		gap: 1rem;
 		background: #372f2f;
 		border-radius: 1rem;
@@ -369,6 +462,34 @@
 
 	.emoji_button {
 		background-color: none;
+	}
+
+	.conversations-box {
+		width: auto;
+	}
+
+	.conversation-list {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		justify-content: space-between;
+		background: #4e4848;
+		border-radius: 1rem;
+		padding: 1rem;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		@media (max-width: 800px) {
+			gap: 8px;
+		}
+		overflow-y: scroll;
+		height: 500px;
+		max-height: 100%;
+	}
+
+	.conversation-preview {
+		background-color: whitesmoke;
+		border-radius: 1rem;
+		padding: 1rem;
+		max-width: 200px;
 	}
 
 	.TopicList {

@@ -4,9 +4,14 @@
 	import Loading from '$lib/components/Loading.svelte';
 	import Modal from '$lib/components/chatbot.svelte';
 
-	let messages: { bot: string; text: string; chat_color: string; message_id: string }[] = $state(
-		[]
-	);
+	let messages: {
+		bot: string;
+		text: string;
+		chat_color: string;
+		message_id: string;
+		reacts: { reaction: string; quantity: number }[];
+	}[] = $state([]);
+	const emojis = ['😀', '😂', '🥰', '🤑', '😱', '😭', '🤖', '🤯'];
 	let input = $state('');
 	let current_topic = '';
 	let session_id = '';
@@ -60,10 +65,11 @@
 				messages = [
 					...messages,
 					{
-						bot: msg.writer,
-						text: msg.message,
-						chat_color: chat_color,
-						message_id: msg.id
+						bot: msg.bot,
+						text: msg.text,
+						chat_color: msg.chat_color,
+						message_id: msg.message_id,
+						reacts: msg.reacts
 					}
 				];
 				if (chat_color == '#D0F0FD') {
@@ -104,7 +110,8 @@
 					bot: data.bot_name,
 					text: data.response,
 					chat_color: data.chat_color,
-					message_id: data.response_id
+					message_id: data.response_id,
+					reacts: data.reacts
 				}
 			];
 		} catch (error) {
@@ -117,7 +124,8 @@
 					bot: 'System',
 					text: `Error: ${error instanceof Error ? error.message : String(error)}`,
 					chat_color: '#ff0000',
-					message_id: 'Error'
+					message_id: 'Error',
+					reacts: []
 				}
 			];
 		} finally {
@@ -298,60 +306,30 @@
 					<strong>{msg.bot}:</strong>
 					{msg.text}
 
+					{#if msg.reacts.length > 0}
+						<div class="reaction-row">
+							{#each msg.reacts as r}
+								<span class="emoji-reaction">{r.reaction} {r.quantity}</span>
+							{/each}
+						</div>
+					{/if}
+
 					<button onclick={() => openEmojiPicker(msg.message_id)}> {@html emoji_button} </button>
 
 					<!-- Emoji Picker only shows for the active message -->
 					{#if showModal && message_id === msg.message_id}
 						<div class="emoji-picker-modal">
 							<!-- <EmojiPicker bind:value={emoji_text} /> -->
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '😀';
-								}}>😀</button
-							>
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '😂';
-								}}>😂</button
-							>
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '🥰';
-								}}>🥰</button
-							>
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '🤑';
-								}}>🤑</button
-							>
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '😱';
-								}}>😱</button
-							>
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '😭';
-								}}>😭</button
-							>
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '🤖';
-								}}>🤖</button
-							>
-							<button
-								class="emoji_button"
-								onclick={() => {
-									emoji_text = '🤯';
-								}}>🤯</button
-							>
+							{#each emojis as emoji}
+								<button
+									class="emoji_button"
+									onclick={() => {
+										emoji_text = emoji;
+									}}
+								>
+									{emoji}
+								</button>
+							{/each}
 						</div>
 					{/if}
 				</div>

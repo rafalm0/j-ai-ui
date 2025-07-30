@@ -14,9 +14,13 @@
 	const emojis = ['😀', '😂', '🥰', '🤑', '😱', '😭', '🤖', '🤯'];
 	let input = $state('');
 	let current_topic = '';
-	let session_id = '';
+	let conversation_id = '';
 	let debugging_log: boolean = false;
 	let debug_msg: unknown = $state(null);
+	let bot_1_name = $state('1999 Bot');
+	let bot_2_name = $state('2024 Bot');
+	let conv_name = $state('bot_chat');
+	let show_extra_config = $state(false);
 	let cite: boolean = $state(false);
 	let emoji_text = $state('');
 	let message_id = $state('');
@@ -25,7 +29,6 @@
 	let showConversationList = $state(false);
 	let conversationList: { id: string; Topic: string; name: string; bot1: string; bot2: string }[] =
 		$state([]);
-
 	async function alternateConversationList() {
 		showConversationList = !showConversationList;
 	}
@@ -85,11 +88,24 @@
 
 	async function comm(bodyData: {
 		topic: string;
-		session_id: string | null;
+		conversation_id: string | null;
 		cite: boolean | false;
+		conv_name: string | null;
+		bot_1_name: string | null;
+		bot_2_name: string | null;
 	}) {
 		input = '';
 		loading.setLoading(true, "I'm loading");
+		console.log(`
+		===== 💬 Sending Conversation Data =====
+		 Topic         : ${bodyData.topic}
+		 Session ID    : ${bodyData.conversation_id ?? 'None'}
+		 Cite?         : ${bodyData.cite ? 'Yes' : 'No'}
+		 Conv. Name    : ${bodyData.conv_name ?? 'Not set'}
+		 Bot 1         : ${bodyData.bot_1_name ?? 'Default'}
+		 Bot 2         : ${bodyData.bot_2_name ?? 'Default'}
+		========================================
+		`);
 		current_topic = bodyData.topic;
 
 		const body = JSON.stringify(bodyData);
@@ -102,15 +118,16 @@
 		try {
 			const response = await fetch('https://j-ai-3jvd.onrender.com/multi-agent-chat', options);
 			const data = await response.json();
-			session_id = String(data.session_id);
+			console.log(data);
+			conversation_id = String(data.conversation_id);
 
 			messages = [
 				...messages,
 				{
-					bot: data.bot_name,
-					text: data.response,
+					bot: data.bot,
+					text: data.text,
 					chat_color: data.chat_color,
-					message_id: data.response_id,
+					message_id: data.message_id,
 					reacts: data.reacts
 				}
 			];
@@ -142,7 +159,7 @@
 	}
 
 	async function RestartConversation() {
-		session_id = '';
+		conversation_id = '';
 		current_topic = '';
 
 		messages = [];
@@ -156,19 +173,25 @@
 
 		await comm({
 			topic: current_topic,
-			session_id: session_id || null,
-			cite: cite
+			conversation_id: conversation_id || null,
+			cite: cite,
+			bot_1_name: bot_1_name,
+			bot_2_name: bot_2_name,
+			conv_name: conv_name
 		});
 		input = '';
 	}
 
 	async function continueConversation() {
-		if (!session_id) return;
+		if (!conversation_id) return;
 
 		await comm({
 			topic: current_topic,
-			session_id,
-			cite: cite
+			conversation_id: conversation_id,
+			cite: cite,
+			bot_1_name: bot_1_name,
+			bot_2_name: bot_2_name,
+			conv_name: conv_name
 		});
 	}
 
@@ -279,22 +302,39 @@
 			</div>
 		</div>
 
-		<div class="custom-input-div">
+		{#if !show_extra_config}
+			<button
+				class="extra-config-button"
+				onclick={() => {
+					show_extra_config = true;
+				}}>Open extra configurations</button
+			>
+		{:else}
+			<div class="custom-input-div">
+				<input
+					class="custom-input-field"
+					bind:value={input}
+					placeholder="Write your own topic here"
+				/>
+				<button class="custom-input-button" onclick={startConversation}>→</button>
+			</div>
+
+			<input class="extra-config-input" bind:value={bot_1_name} placeholder="1st Bot name" />
+			<input class="extra-config-input" bind:value={bot_2_name} placeholder="2nd Bot name" />
 			<input
-				class="custom-input-field"
-				bind:value={input}
-				placeholder="Write your own topic here"
+				class="extra-config-input"
+				bind:value={conv_name}
+				placeholder="Your Conversation Name"
 			/>
-			<button class="custom-input-button" onclick={startConversation}>→</button>
-		</div>
-		<label>
-			<input
-				type="checkbox"
-				bind:checked={cite}
-				style="width:20px;padding:10px;margin-right:10px"
-			/>
-			<h style="color:white">Citations</h>
-		</label>
+			<label>
+				<input
+					type="checkbox"
+					bind:checked={cite}
+					style="width:20px;padding:10px;margin-right:10px"
+				/>
+				<h style="color:white">Citations</h>
+			</label>
+		{/if}
 	</div>
 
 	<div class="main-box">
@@ -306,13 +346,11 @@
 					<strong>{msg.bot}:</strong>
 					{msg.text}
 
-					{#if msg.reacts.length > 0}
-						<div class="reaction-row">
-							{#each msg.reacts as r}
-								<span class="emoji-reaction">{r.reaction} {r.quantity}</span>
-							{/each}
-						</div>
-					{/if}
+					<div class="reaction-row">
+						{#each msg.reacts as r}
+							<span class="emoji-reaction">{r.reaction} {r.quantity}</span>
+						{/each}
+					</div>
 
 					<button onclick={() => openEmojiPicker(msg.message_id)}> {@html emoji_button} </button>
 
@@ -369,6 +407,7 @@
 						<button
 							class="LoadConvButton"
 							onclick={() => {
+								conversation_id = String(conv.id);
 								LoadConv(String(conv.id));
 							}}>Load</button
 						>
@@ -468,6 +507,14 @@
 		border-radius: 1rem;
 		padding: 1rem;
 		max-width: 200px;
+	}
+
+	.extra-config-button {
+		background-color: #003459;
+	}
+
+	.extra-config-input {
+		width: 100%;
 	}
 
 	.TopicList {
